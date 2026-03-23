@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-base: #0f172a;
+    --brand-card: #1e293b;
+    --brand-accent: #f97316;
+    --brand-accent-hover: #ea580c;
+    --brand-text: #f8fafc;
+    --brand-muted: #94a3b8;
+
+    --bg-main: #0f172a;
+    --grid-color: rgba(249, 115, 22, 0.05);
+    --panel-bg: rgba(30, 41, 59, 0.8);
+    --panel-border: rgba(249, 115, 22, 0.2);
+    --panel-border-hover: rgba(249, 115, 22, 0.5);
+
+    --gray-900: #111827;
+    --gray-800: #1f2937;
+    --gray-700: #374151;
+    --gray-600: #4b5563;
+    --gray-500: #6b7280;
+    --gray-400: #9ca3af;
+    --white: #ffffff;
+  }
+
+  .light {
+    --brand-base: #f1f5f9;
+    --brand-card: #ffffff;
+    --brand-accent: #ea580c;
+    --brand-accent-hover: #c2410c;
+    --brand-text: #0f172a;
+    --brand-muted: #475569;
+
+    --bg-main: #f8fafc;
+    --grid-color: rgba(234, 88, 12, 0.15);
+    --panel-bg: rgba(255, 255, 255, 0.95);
+    --panel-border: rgba(234, 88, 12, 0.4);
+    --panel-border-hover: rgba(234, 88, 12, 0.8);
+
+    /* Mappings to invert explicitly hardcoded gray utility classes */
+    --gray-900: #e2e8f0;
+    --gray-800: #f1f5f9;
+    --gray-700: #cbd5e1;
+    --gray-600: #94a3b8;
+    --gray-500: #64748b;
+    --gray-400: #475569;
+    --white: #0f172a;
+  }
+
+  html, body {
+    background-color: var(--bg-main) !important;
+    color: var(--brand-text) !important;
+  }
+  
+  body {
+    background-image:
+        linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+    background-size: 40px 40px;
+    min-height: 100vh;
+    font-family: 'Rajdhani', sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+}
+
+@layer utilities {
+  .text-white { color: var(--white) !important; }
+  .bg-black { background-color: var(--brand-card) !important; color: var(--brand-text) !important; }
+  .bg-gray-700 { background-color: var(--gray-700) !important; }
+  .bg-gray-800 { background-color: var(--gray-800) !important; }
+  .bg-gray-900 { background-color: var(--gray-900) !important; }
+  .border-gray-700 { border-color: var(--gray-700) !important; }
+  .border-gray-800 { border-color: var(--gray-800) !important; }
+  .text-gray-300 { color: var(--brand-text) !important; }
+  .text-gray-400 { color: var(--gray-400) !important; }
+  .text-gray-500 { color: var(--gray-500) !important; }
+  .text-gray-600 { color: var(--gray-600) !important; }
+}
+
+@layer components {
+  .cs-panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+  }
+
+  .cs-panel:hover {
+    border-color: var(--panel-border-hover);
+  }
+
+  .cs-button {
+    background: linear-gradient(45deg, var(--brand-accent-hover), var(--brand-accent));
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
+    transition: transform 0.2s, filter 0.2s;
+  }
+
+  .cs-button:hover {
+    transform: scale(1.05);
+    filter: brightness(1.2);
+  }
+
+  .text-glow {
+    text-shadow: 0 0 10px var(--panel-border-hover);
+  }
+}
