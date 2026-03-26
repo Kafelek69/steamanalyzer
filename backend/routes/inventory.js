@@ -184,23 +184,6 @@ router.get('/analyze', async (req, res) => {
             });
         });
 
-        // MASOWE POBIERANIE REALNEGO FLOATA PRZEZ CSGOFLOAT
-        // Wykonujemy w pętli asynchronicznie tylko dla najważniejszych/wszystkich opłacalnych itemów
-        const tasks = mappedItems.map(async (item) => {
-            if (!item.isNonWearable && item.inspectLink) {
-                const realData = await fetchRealFloatAndSeed(item.inspectLink);
-                if (realData && realData.float != null && !isNaN(realData.float)) {
-                    item.float = realData.float;
-                    item.pattern = realData.seed;
-                    // Korygowanie nazwy (zużycia) na podstawie realnego odczytu z weryfikatora Steama
-                    item.itemName = applyWearBasedOnFloat(item.itemName, item.float);
-                }
-            }
-            return item;
-        });
-
-        await Promise.all(tasks);
-
         // Wycena ogólna całego dobytku (czy zyska)
         let overallPrediction = "STABILNY";
         let score = mappedItems.reduce((acc, item) => item.trend === "UP" ? acc + 1 : (item.trend === "DOWN" ? acc - 1 : acc), 0);
@@ -222,6 +205,25 @@ router.get('/analyze', async (req, res) => {
     } catch (error) {
         console.error("Inv error:", error);
         res.status(500).json({ error: "Błąd serwera. Spróbuj pownownie: " + error.message });
+    }
+});
+
+// Endpoint do progresywnego wyciągania floata na żywo! (Bez zawieszania strony)
+router.get('/float', async (req, res) => {
+    const { inspectLink, baseName } = req.query;
+    if (!inspectLink) return res.json({ float: null, pattern: null, itemName: baseName || "" });
+    
+    try {
+        const data = await fetchRealFloatAndSeed(inspectLink, baseName);
+        let newName = baseName || "";
+        
+        if (data && data.float !== null && !isNaN(data.float)) {
+            newName = applyWearBasedOnFloat(newName, data.float);
+            return res.json({ float: data.float, pattern: data.seed, itemName: newName });
+        }
+        return res.json({ float: null, pattern: null, itemName: newName });
+    } catch (e) {
+        return res.json({ float: null, pattern: null, itemName: baseName || "" });
     }
 });
 
