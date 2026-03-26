@@ -394,7 +394,7 @@ export default function P2PMarket() {
                                 <div className="text-lg font-bold truncate text-white" title={listing.item.name}>{formatItemNameWithCondition(listing.item.name, listing.item.float)}</div>
                                 
                                 <div className="flex justify-between items-center mt-2">
-                                    <div className="text-brand-muted text-sm">Float: <span className="text-white font-mono">{(typeof listing.item.float === "number" ? listing.item.float.toFixed(6) : "N/A")}</span></div>
+                                    <div className="text-brand-muted text-sm">Float: <span className="text-white font-mono">{(listing.item.float != null && !isNaN(listing.item.float) ? Number(listing.item.float).toFixed(6) : "N/A")}</span></div>
                                     <div className="text-brand-muted text-sm">Seed: <span className="text-white font-mono">{listing.item.pattern}</span></div>
                                 </div>
 

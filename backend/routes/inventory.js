@@ -1,5 +1,6 @@
 const express = require('express');
 const axios = require('axios');
+const { fetchRealFloatAndSeed, applyWearBasedOnFloat } = require('../services/floatService');
 const router = express.Router();
 
 let realPrices = {};
@@ -124,19 +125,38 @@ router.get('/analyze', async (req, res) => {
                     if (tag.category === "Rarity") rarity = tag.localized_tag_name;
                 });
             }
-            if (name.includes("Case") || name.includes("Capsule") || name.includes("Agent")) {
+            
+            // Fix for Case Hardened items being treated as containers
+            if ((name.includes("Case") && !name.includes("Case Hardened")) || name.includes("Capsule") || name.includes("Agent") || name.includes("Graffiti") || name.includes("Patch") || name.includes("Pin")) {
                 isNonWearable = true; 
             }
 
+            // Ostateczna weryfikacja na podstawie nazwy - 100% skuteczności
             let exactFloat = null;
             let exactPattern = null;
             let inspectLink = null;
+            
+            let wearBase = 0.15;
+            let wearRange = 0.23;
+            
+            if (name.includes("(Factory New)")) { isNonWearable = false; wearBase = 0.00; wearRange = 0.07; }
+            else if (name.includes("(Minimal Wear)")) { isNonWearable = false; wearBase = 0.07; wearRange = 0.08; }
+            else if (name.includes("(Field-Tested)")) { isNonWearable = false; wearBase = 0.15; wearRange = 0.23; }
+            else if (name.includes("(Well-Worn)")) { isNonWearable = false; wearBase = 0.38; wearRange = 0.07; }
+            else if (name.includes("(Battle-Scarred)")) { isNonWearable = false; wearBase = 0.45; wearRange = 0.55; }
 
             if (desc.actions && desc.actions.length > 0) {
                 const action = desc.actions.find(a => a.name === 'Inspect in Game...');
                 if (action) {
                     inspectLink = action.link.replace('%owner_steamid%', target).replace('%assetid%', asset.assetid);
                 }
+            }
+            
+            // Zawsze staramy się pobrać prawdziwy, ale początkowo ustalamy na null
+            // aby pętle asynchroniczne wiedziały, że nie ma fakesa (NIE KŁAMIEMY UŻYTKOWNIKOWI O FLOACIE).
+            if (!isNonWearable) {
+                exactFloat = null;
+                exactPattern = null;
             }
 
             let price = generateStablePrice(name, tagsString);
@@ -163,6 +183,23 @@ router.get('/analyze', async (req, res) => {
                 isNonWearable
             });
         });
+
+        // MASOWE POBIERANIE REALNEGO FLOATA PRZEZ CSGOFLOAT
+        // Wykonujemy w pętli asynchronicznie tylko dla najważniejszych/wszystkich opłacalnych itemów
+        const tasks = mappedItems.map(async (item) => {
+            if (!item.isNonWearable && item.inspectLink) {
+                const realData = await fetchRealFloatAndSeed(item.inspectLink);
+                if (realData && realData.float != null && !isNaN(realData.float)) {
+                    item.float = realData.float;
+                    item.pattern = realData.seed;
+                    // Korygowanie nazwy (zużycia) na podstawie realnego odczytu z weryfikatora Steama
+                    item.itemName = applyWearBasedOnFloat(item.itemName, item.float);
+                }
+            }
+            return item;
+        });
+
+        await Promise.all(tasks);
 
         // Wycena ogólna całego dobytku (czy zyska)
         let overallPrediction = "STABILNY";

@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 5000;
 
 // Konfiguracja sesji dla logowania Steam
 app.use(session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || 'fallback_secret_key_123',
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false } // Ustaw na `true` jeśli będziesz używać HTTPS w produkcji

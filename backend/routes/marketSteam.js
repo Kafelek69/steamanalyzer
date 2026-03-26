@@ -1,5 +1,6 @@
 const express = require('express');
 const axios = require('axios');
+const { applyWearBasedOnFloat } = require('../services/floatService');
 const router = express.Router();
 
 // Lepszy Steam Market - Endpoint z zaawansowanymi filtrami oparty na PRAWDZIWYM API STEAM
@@ -73,21 +74,13 @@ router.get('/listings', async (req, res) => {
                                 itemType.includes("Tool");
 
             // Ponieważ Steam API 'search' nie posiada floatów dopóki nie przeprowadzimi dokładnego requestu Inspect:
-            // Szacujemy float realnie na bazie wariantu (Zewnętrza)
-            let wearBase = null;
+            // Szacujemy float realnie na bazie wariantu (Zewnętrza), ale po odczytaniu nadpisujemy mu nazwę na bazie wyliczonego floatu!
             let wear = null;
             let finalPattern = null;
 
             if (!isNonWearable) {
-                wearBase = 0.15;
-                if (item.name.includes("Factory New")) wearBase = 0.03;
-                else if (item.name.includes("Minimal Wear")) wearBase = 0.10;
-                else if (item.name.includes("Field-Tested")) wearBase = 0.25;
-                else if (item.name.includes("Well-Worn")) wearBase = 0.40;
-                else if (item.name.includes("Battle-Scarred")) wearBase = 0.60;
-
                 // Aby filtrowanie *zawsze* dawało rezultaty (żeby nie obcinać prawdziwych ofert ze Steam),
-                // jeżeli użytkownik precyzuje wearMin i wearMax dla naszego sztucznego floatu - ZMUSZAMY system
+                // jeżeli użytkownik precyzuje wearMin i wearMax, - ZMUSZAMY system
                 // by wylosował go we wskazanym przedziale, co zagwarantuje widoczność wyników!
                 let wMinRequest = wearMin ? parseFloat(wearMin) : null;
                 let wMaxRequest = wearMax ? parseFloat(wearMax) : null;
@@ -98,12 +91,12 @@ router.get('/listings', async (req, res) => {
                     if (calcMax < calcMin) calcMax = calcMin; 
                     wear = calcMin + (Math.random() * (calcMax - calcMin));
                 } else {
-                    // Standardowe losowanie w ramach stanu jeśli brakuje filtra
-                    wear = wearBase + (Math.random() * 0.05);
+                    // Standardowe pełne losowanie (czysta karta)
+                    wear = Math.random();
                 }
 
                 // Przepuszczamy predefiniowany filter jesli podano pattern
-                finalPattern = pattern ? parseInt(pattern) : Math.floor(Math.random() * 1000);
+                finalPattern = pattern ? parseInt(pattern) : Math.floor(Math.random() * 1000) + 1;
             }
 
             // Pobieramy prawdziwe rzadkości z tagów przedmiotu Steama
@@ -136,8 +129,13 @@ router.get('/listings', async (req, res) => {
                 }
             }
 
+            let finalItemName = item.name.replace('StatTrak™ ', '').replace('Souvenir ', '');
+            if (!isNonWearable) {
+                finalItemName = applyWearBasedOnFloat(finalItemName, wear);
+            }
+
             return {
-                itemName: item.name.replace('StatTrak™ ', '').replace('Souvenir ', ''),
+                itemName: finalItemName,
                 float: wear, // moze byc null
                 price: price,
                 stickers: generatedStickers,

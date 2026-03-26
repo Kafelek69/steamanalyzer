@@ -24,7 +24,7 @@ function InventoryAnalyzer() {
             });
             setInventoryData(response.data);
         } catch (err) {
-            setError(err.response?.data?.error || "Wystπpi≥ b≥πd komunikacji z serwerem.");
+            setError(err.response?.data?.error || "WystƒÖpi≈Ç b≈ÇƒÖd komunikacji z serwerem.");
         }
         
         setLoading(false);
@@ -37,7 +37,7 @@ function InventoryAnalyzer() {
                     <i className="fa-solid fa-magnifying-glass-chart text-brand-accent mr-3"></i>
                     {t('inventory.title')} CS2
                 </h1>
-                <p className="text-brand-muted mb-6">Wprowadü SteamID64 lub link do profilu, aby wyceniÊ swÛj ekwipunek i sprawdziÊ jego potencja≥ zysku.</p>
+                <p className="text-brand-muted mb-6">Wprowad≈∫ SteamID64 lub link do profilu, aby wyceniƒá sw√≥j ekwipunek i sprawdziƒá jego potencja≈Ç zysku.</p>
                 
                 <form onSubmit={handleAnalyze} className="max-w-2xl mx-auto flex flex-col sm:flex-row gap-4">
                     <div className="flex-1 relative">
@@ -64,7 +64,7 @@ function InventoryAnalyzer() {
 
             {loading && (
                 <div className="text-center py-20 text-brand-muted text-xl animate-pulse">
-                    Trwa pobieranie przedmiotÛw ze Steam...
+                    Trwa pobieranie przedmiot√≥w ze Steam...
                 </div>
             )}
 
@@ -73,11 +73,11 @@ function InventoryAnalyzer() {
                     {/* Statystyki Profilu */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="cs-panel p-6 rounded text-center border-b-4 border-brand-accent">
-                            <div className="text-brand-muted font-bold mb-2">ILOå∆ SKANOWANYCH ITEM”W</div>
+                            <div className="text-brand-muted font-bold mb-2">ILO≈öƒÜ SKANOWANYCH ITEM√ìW</div>
                             <div className="text-4xl font-bold text-white">{inventoryData.itemsCount}</div>
                         </div>
                         <div className="cs-panel p-6 rounded text-center border-b-4 border-brand-accent">
-                            <div className="text-brand-muted font-bold mb-2">{t('dashboard.totalValue') || '£•CZNA WARTOå∆ RYNKOWA'}</div>
+                            <div className="text-brand-muted font-bold mb-2">{t('dashboard.totalValue') || '≈ÅƒÑCZNA WARTO≈öƒÜ RYNKOWA'}</div>
                             <div className="text-4xl font-bold text-brand-accent">{formatPrice(inventoryData.totalValue)}</div>
                         </div>
                         <div className="cs-panel p-6 rounded text-center border-b-4 border-brand-accent">
@@ -86,16 +86,16 @@ function InventoryAnalyzer() {
                         </div>
                     </div>
 
-                    {/* Lista PrzedmiotÛw */}
+                    {/* Lista PrzedmiotÔøΩw */}
                     <div className="cs-panel p-6 rounded">
                         <h2 className="text-2xl font-bold border-b border-brand-accent pb-2 mb-6 text-brand-text">
-                            ZAWartoúÊ Inwentarza (Sortowane po cenie)
+                            Zawarto≈õƒá inwentarza (Sortowane po cenie)
                         </h2>
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-6">
                             {inventoryData.data.map((item, idx) => (
                                 <div key={idx} className="bg-brand-base border border-gray-700/50 rounded-lg overflow-hidden group hover:border-brand-accent transition-colors duration-300 relative">
-                                    {/* GÛrne oznaczenia */}
+                                    {/* GÔøΩrne oznaczenia */}
                                     <div className="absolute top-2 right-2 flex flex-col gap-1 z-10 text-right items-end">
                                         <div className={`text-xs font-bold bg-gray-900/80 px-2 py-0.5 rounded ${
                                             item.rarity === 'Covert' ? 'text-red-500' :
@@ -106,7 +106,7 @@ function InventoryAnalyzer() {
                                             item.rarity === 'Contraband' ? 'text-yellow-500' :
                                             'text-gray-400'
                                         }`}>{item.rarity.toUpperCase()}</div>
-                                        {item.trend === "UP" && <div className="text-[10px] font-bold text-green-400 bg-green-900/50 px-2 py-0.5 rounded border border-green-500/50"><i className="fa-solid fa-arrow-trend-up"></i> ROåNIE</div>}
+                                        {item.trend === "UP" && <div className="text-[10px] font-bold text-green-400 bg-green-900/50 px-2 py-0.5 rounded border border-green-500/50"><i className="fa-solid fa-arrow-trend-up"></i> RO≈öNIE</div>}
                                         {item.trend === "DOWN" && <div className="text-[10px] font-bold text-red-400 bg-red-900/50 px-2 py-0.5 rounded border border-red-500/50"><i className="fa-solid fa-arrow-trend-down"></i> SPADA</div>}
                                     </div>
                                     
@@ -119,8 +119,8 @@ function InventoryAnalyzer() {
                                         
                                         {!item.isNonWearable ? (
                                             <div className="flex justify-between items-center text-xs">
-                                                <div className="text-gray-400">Float: <span className="text-white font-mono">{(typeof item.float === "number" ? item.float.toFixed(6) : "N/A")}</span></div>
-                                                <div className="text-gray-400">Seed: <span className="text-white font-mono">{item.pattern}</span></div>
+                                                <div className="text-gray-400">Float: <span className="text-white font-mono">{(item.float != null && !isNaN(item.float) ? Number(item.float).toFixed(6) : "N/A")}</span></div>
+                                                <div className="text-gray-400">Seed: <span className="text-white font-mono">{item.pattern != null ? item.pattern : "N/A"}</span></div>
                                             </div>
                                         ) : (
                                             <div className="text-xs text-gray-500 italic">Brak parametru float</div>

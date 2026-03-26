@@ -292,7 +292,7 @@ function EnhancedMarket() {
                                     
                                     {!item.isNonWearable && (
                                         <div className="flex justify-between items-center mt-2">
-                                            <div className="text-brand-muted text-sm">Float: <span className="text-white font-mono">{(typeof item.float === "number" ? item.float.toFixed(6) : "N/A")}</span></div>
+                                            <div className="text-brand-muted text-sm">Float: <span className="text-white font-mono">{(item.float != null && !isNaN(item.float) ? Number(item.float).toFixed(6) : "N/A")}</span></div>
                                             {item.pattern !== null && <div className="text-brand-muted text-sm">Seed: <span className="text-white font-mono">{item.pattern}</span></div>}
                                         </div>
                                     )}

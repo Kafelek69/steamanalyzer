@@ -1,4 +1,5 @@
 const express = require('express');
+const { applyWearBasedOnFloat } = require('../services/floatService');
 const router = express.Router();
 
 let p2pListings = [];
@@ -51,8 +52,14 @@ function generateMockListings() {
         let isSouvenir = baseItem.name.includes("Souvenir");
         if(isSouvenir) isStatTrak = false;
 
-        let pName = isStatTrak ? "StatTrak� " + baseItem.name : baseItem.name;
-        let float = 0.5; if (baseItem.name.includes("Factory New")) { float = 0.001 + Math.random() * 0.068; } else if (baseItem.name.includes("Minimal Wear")) { float = 0.07 + Math.random() * 0.079; } else if (baseItem.name.includes("Field-Tested")) { float = 0.15 + Math.random() * 0.229; } else if (baseItem.name.includes("Well-Worn")) { float = 0.38 + Math.random() * 0.069; } else if (baseItem.name.includes("Battle-Scarred")) { float = 0.45 + Math.random() * 0.549; }
+        // W p2p losujemy float na potrzeby testów, ALE NAZWA (zużycie) MA BYĆ ZMIENIANA W OPARCIU O NIEGO!
+        let floatValue = Math.random(); // Prawdziwy losowy float (czysta karta)
+        
+        let basePathName = baseItem.name.replace(/\s*\((Factory New|Minimal Wear|Field-Tested|Well-Worn|Battle-Scarred)\)/i, '');
+        let pName = isStatTrak ? "StatTrak™ " + basePathName : basePathName;
+
+        // Używamy naszego pomocnika by doczepić do nazwy poprawną kondycję z wygenerowanego floata
+        pName = applyWearBasedOnFloat(pName, floatValue);
         
         let rarityLabel = baseItem.name.includes("?") ? "Covert" : "Classified";
         if (baseItem.name.includes("Redline") || baseItem.name.includes("Slate")) rarityLabel = "Restricted";
@@ -71,8 +78,8 @@ function generateMockListings() {
             item: {
                 name: pName,
                 img: baseItem.img,
-                float: float,
-                pattern: Math.floor(Math.random() * 1000),
+                float: floatValue,
+                pattern: Math.floor(Math.random() * 1000) + 1,
                 rarity: rarityLabel,
                 isStatTrak: isStatTrak,
                 isSouvenir: isSouvenir,
@@ -133,7 +140,7 @@ router.post('/buy/:id', (req, res) => {
     const index = p2pListings.findIndex(listing => listing.id === id);
     
     if (index === -1) {
-        return res.status(404).json({ error: "Przedmiot zosta� ju� sprzedany lub nie istnieje!" });
+        return res.status(404).json({ error: "Przedmiot zosta� ju� sprzedany lub nie istnieje!" });
     }
 
     const boughtItem = p2pListings[index];
@@ -141,7 +148,7 @@ router.post('/buy/:id', (req, res) => {
 
     res.json({ 
         success: true, 
-        message: "Z powodzeniem zakupiono przedmiot " + boughtItem.item.name + " od gracza " + boughtItem.seller.name + "! Zap�acono " + boughtItem.price + " PLN.",
+        message: "Z powodzeniem zakupiono przedmiot " + boughtItem.item.name + " od gracza " + boughtItem.seller.name + "! Zap�acono " + boughtItem.price + " PLN.",
         item: boughtItem
     });
 });
